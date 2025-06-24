@@ -12,6 +12,7 @@ const DURATION_PRESETS = [5, 10, 30, 60, 120, 300]; // seconds
 
 export default function SeizureScreen({ route, navigation }) {
   const { time } = route.params;
+  const timeObj  = time ? new Date(time) : new Date(); 
   const [type, setType]             = useState(null);
   const [durationSec, setDuration]  = useState(0);
 

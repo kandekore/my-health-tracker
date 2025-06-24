@@ -19,11 +19,11 @@ export default function TimeSelectScreen({ route, navigation }) {
   const onPresetPress = (preset) => {
     if (preset.minutesAgo === null) {
       //  Manual: show the system date-time picker ---------------------------
-      navigation.navigate(category, { time: new Date(), category });
+      navigation.navigate(category, { time: new Date().toISOString(), category });
       //  For brevity we skip picker implementation here; plug one in later.
     } else {
       const time = new Date(Date.now() - preset.minutesAgo * 60_000);
-      navigation.navigate(category, { time, category });
+      navigation.navigate(category, { time: time.toISOString(), category });
     }
   };
 

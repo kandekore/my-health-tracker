@@ -9,6 +9,8 @@ export default function HomeScreen({ navigation }) {
         title="Log a Seizure"
         onPress={() => navigation.navigate('TimeSelect', { category: 'Seizure' })}
       />
+      <Button title="View Seizures" onPress={()=>navigation.navigate('SeizureList')}/>
+
     </View>
   );
 }

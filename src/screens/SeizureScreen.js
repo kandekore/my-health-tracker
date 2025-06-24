@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { useSeizures } from '../context/SeizureContext';
+import { createSeizure } from '../services/seizureApi';
 
 const SEIZURE_TYPES = [
   'Absence', 'Tonic-Clonic', 'Focal', 'Myoclonic',
@@ -21,7 +23,20 @@ export default function SeizureScreen({ route, navigation }) {
       Alert.alert('Missing info', 'Please pick a seizure type and duration.');
       return;
     }
+const { refresh } = useSeizures();
 
+const saveRecord = async () => {
+  if (!type || durationSec === 0) return Alert.alert('Missing info','…');
+  const payload = { userId:'demoUser', time, type, durationSec };
+
+  try {
+    await createSeizure(payload);
+    await refresh();                       // pull latest list
+    navigation.navigate('SeizureConfirm', { payload }); // new screen
+  } catch (e) {
+    Alert.alert('Error', e.message);
+  }
+};
     /* TODO: call your API here */
     console.log({
       category: 'Seizure',
@@ -105,3 +120,16 @@ const styles = StyleSheet.create({
   },
   saveText: { color: '#fff', fontSize: 18 },
 });
+
+// export default function SeizureConfirm({ route, navigation }) {
+//   const { payload } = route.params;
+//   return (
+//     <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+//       <Text style={{fontSize:22}}>Logged!</Text>
+//       <Text>{payload.type} – {payload.durationSec}s</Text>
+//       <TouchableOpacity onPress={()=>navigation.popToTop()}>
+//         <Text style={{marginTop:20,color:'#4F83FF'}}>Back to Home</Text>
+//       </TouchableOpacity>
+//     </View>
+//   );
+// }

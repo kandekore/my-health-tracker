@@ -2,20 +2,29 @@
   "name": "my-health-tracker",
   "version": "1.0.0",
   "main": "index.js",
+  "resolutions": {
+    "**/metro": "0.82.4",
+    "**/metro-config": "0.82.4",
+    "**/metro-core": "0.82.4",
+    "**/metro-runtime": "0.82.4",
+    "**/metro-source-map": "0.82.4"
+  },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/native": "^7.1.10",
     "@react-navigation/stack": "^7.3.3",
-    "expo": "~53.0.11",
+    "axios": "^1.10.0",
+    "expo": "53.0.12",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
-    "react-native": "0.79.3",
+    "react-native": "0.79.4",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",

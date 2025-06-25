@@ -1,53 +1,44 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
-import { useSeizures } from '../context/SeizureContext';
-import { createSeizure } from '../services/seizureApi';
+import { useSeizures } from '../context/SeizureContext'; //
+import { createSeizure } from '../services/seizureApi'; //
 
-const SEIZURE_TYPES = [
+const SEIZURE_TYPES = [ //
   'Absence', 'Tonic-Clonic', 'Focal', 'Myoclonic',
   'Atonic', 'Infantile Spasm', 'Other',
 ];
 
-const DURATION_PRESETS = [5, 10, 30, 60, 120, 300]; // seconds
+const DURATION_PRESETS = [5, 10, 30, 60, 120, 300]; // seconds //
 
 export default function SeizureScreen({ route, navigation }) {
-  const { time } = route.params;
-  const timeObj  = time ? new Date(time) : new Date(); 
-  const [type, setType]             = useState(null);
-  const [durationSec, setDuration]  = useState(0);
+  const { time } = route.params; //
+  const timeObj  = time ? new Date(time) : new Date(); //
+
+  const [type, setType]             = useState(null); //
+  const [durationSec, setDuration]  = useState(0); //
+
+  // Move the useSeizures hook call here, at the top level of the component
+  const { refresh } = useSeizures(); // <-- CORRECT LOCATION
 
   // ––––– Handlers ––––– //
-  const addDuration = (sec) => setDuration((prev) => prev + sec);
+  const addDuration = (sec) => setDuration((prev) => prev + sec); //
 
-  const saveRecord = () => {
-    if (!type || durationSec === 0) {
-      Alert.alert('Missing info', 'Please pick a seizure type and duration.');
-      return;
+  const saveRecord = async () => {
+    if (!type || durationSec === 0) { //
+      Alert.alert('Missing info', 'Please pick a seizure type and duration.'); //
+      return; //
     }
-const { refresh } = useSeizures();
+    // const { refresh } = useSeizures(); // <-- REMOVE THIS LINE (it's now at the top)
 
-const saveRecord = async () => {
-  if (!type || durationSec === 0) return Alert.alert('Missing info','…');
-  const payload = { userId:'demoUser', time, type, durationSec };
+    const payload = { userId:'demoUser', time, type, durationSec }; //
 
-  try {
-    await createSeizure(payload);
-    await refresh();                       // pull latest list
-    navigation.navigate('SeizureConfirm', { payload }); // new screen
-  } catch (e) {
-    Alert.alert('Error', e.message);
-  }
-};
-    /* TODO: call your API here */
-    console.log({
-      category: 'Seizure',
-      time,
-      type,
-      durationSec,
-    });
-
-    Alert.alert('Saved', 'Seizure logged successfully.');
-    navigation.popToTop();   // ← back to Home
+    try {
+      await createSeizure(payload); //
+      await refresh();                       // pull latest list //
+      navigation.navigate('SeizureConfirm', { payload }); // new screen //
+    } catch (e) {
+      Alert.alert('Error', e.message); //
+    }
   };
 
   // ––––– UI ––––– //
@@ -89,48 +80,35 @@ const saveRecord = async () => {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { padding: 24 },
-  heading:   { fontSize: 24, textAlign: 'center', marginBottom: 20 },
-  label:     { fontSize: 18, marginBottom: 8 },
-  grid:      { flexDirection: 'row', flexWrap: 'wrap' },
+const styles = StyleSheet.create({ //
+  container: { padding: 24 }, //
+  heading:   { fontSize: 24, textAlign: 'center', marginBottom: 20 }, //
+  label:     { fontSize: 18, marginBottom: 8 }, //
+  grid:      { flexDirection: 'row', flexWrap: 'wrap' }, //
 
-  // pill buttons for seizure types
-  pill: {
-    paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20,
-    borderWidth: 1, borderColor: '#4F83FF', margin: 4,
-  },
-  pillActive:   { backgroundColor: '#4F83FF' },
-  pillText:     { color: '#4F83FF' },
-  pillTextActive: { color: '#fff' },
+  // pill buttons for seizure types //
+  pill: { //
+    paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20, //
+    borderWidth: 1, borderColor: '#4F83FF', margin: 4, //
+  }, //
+  pillActive:   { backgroundColor: '#4F83FF' }, //
+  pillText:     { color: '#4F83FF' }, //
+  pillTextActive: { color: '#fff' }, //
 
-  // square buttons for duration
-  squareBtn: {
-    width: '28%', margin: '2%', aspectRatio: 1,
-    backgroundColor: '#FFB04F', borderRadius: 12,
-    justifyContent: 'center', alignItems: 'center',
-  },
-  squareText: { color: '#fff', fontWeight: 'bold' },
+  // square buttons for duration //
+  squareBtn: { //
+    width: '28%', margin: '2%', aspectRatio: 1, //
+    backgroundColor: '#FFB04F', borderRadius: 12, //
+    justifyContent: 'center', alignItems: 'center', //
+  }, //
+  squareText: { color: '#fff', fontWeight: 'bold' }, //
 
-  duration:   { fontSize: 16, textAlign: 'center', marginVertical: 16 },
+  duration:   { fontSize: 16, textAlign: 'center', marginVertical: 16 }, //
 
-  saveBtn: {
-    backgroundColor: '#10B981',
-    paddingVertical: 14, borderRadius: 12,
-    alignItems: 'center', marginTop: 8,
-  },
-  saveText: { color: '#fff', fontSize: 18 },
-});
-
-// export default function SeizureConfirm({ route, navigation }) {
-//   const { payload } = route.params;
-//   return (
-//     <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
-//       <Text style={{fontSize:22}}>Logged!</Text>
-//       <Text>{payload.type} – {payload.durationSec}s</Text>
-//       <TouchableOpacity onPress={()=>navigation.popToTop()}>
-//         <Text style={{marginTop:20,color:'#4F83FF'}}>Back to Home</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// }
+  saveBtn: { //
+    backgroundColor: '#10B981', //
+    paddingVertical: 14, borderRadius: 12, //
+    alignItems: 'center', marginTop: 8, //
+  }, //
+  saveText: { color: '#fff', fontSize: 18 }, //
+}); //

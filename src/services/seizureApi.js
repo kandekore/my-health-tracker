@@ -1,14 +1,6 @@
-// src/services/api.js should already exist; this just re-uses it
 import api from './api';
 
-/** POST /api/seizures */
-export const createSeizure = (payload) =>
-  api.post('/seizures', payload);
-
-/** GET /api/seizures?… */
-export const listSeizures = (params = {}) =>
-  api.get('/seizures', { params });
-
-/** PATCH /api/seizures/:id */
-export const updateSeizure = (id, updates) =>
-  api.patch(`/seizures/${id}`, updates);
+export const createSeizure = (data)      => api.post('/seizures', data);
+export const listSeizures  = (params)    => api.get('/seizures', { params });
+export const updateSeizure = (id, data)  => api.patch(`/seizures/${id}`, data);
+export const deleteSeizure = (id)        => api.delete(`/seizures/${id}`);

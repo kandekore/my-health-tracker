@@ -8,7 +8,7 @@ buildscript {
         targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '33')
         kotlinVersion = findProperty('android.kotlinVersion') ?: '1.8.10'
         frescoVersion = findProperty('expo.frescoVersion') ?: '2.5.0'
-
+        androidGradlePluginVersion = '8.1.0' // Make sure this is present and correct
         // We use NDK 23 which has both M1 support and is the side-by-side NDK version from AGP.
         ndkVersion = "23.1.7779620"
     }
@@ -17,8 +17,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath('com.android.tools.build:gradle:7.4.2')
+        // Keep this line for the React Native Gradle Plugin
         classpath('com.facebook.react:react-native-gradle-plugin')
+        // This is the correct line for the new Android Gradle Plugin version
+        classpath "com.android.tools.build:gradle:$androidGradlePluginVersion"
+        // Keep this line for Kotlin
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
     }
 }
 

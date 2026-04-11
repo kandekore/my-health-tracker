@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const seizureSchema = new Schema({
-  userId:     { type: String, required: true },        // wire auth later
+  userId:     { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   time:       { type: Date,   required: true },
   type:       { type: String, required: true },
   durationSec:{ type: Number, required: true },

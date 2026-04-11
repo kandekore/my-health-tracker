@@ -1,29 +1,31 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-/** Presets in minutes; 0 means “Now”. */
 const PRESETS = [
-  { label: 'Now',          minutesAgo: 0 },
-  { label: '1 min ago',    minutesAgo: 1 },
-  { label: '5 min ago',    minutesAgo: 5 },
-  { label: '10 min ago',   minutesAgo: 10 },
-  { label: '15 min ago',   minutesAgo: 15 },
-  { label: '30 min ago',   minutesAgo: 30 },
-  { label: '1 hr ago',     minutesAgo: 60 },
-  { label: 'Manual',       minutesAgo: null }, // null triggers the DateTime picker
+  { label: 'Now',        minutesAgo: 0 },
+  { label: '1 min ago',  minutesAgo: 1 },
+  { label: '5 min ago',  minutesAgo: 5 },
+  { label: '10 min ago', minutesAgo: 10 },
+  { label: '15 min ago', minutesAgo: 15 },
+  { label: '30 min ago', minutesAgo: 30 },
+  { label: '1 hr ago',   minutesAgo: 60 },
+  { label: 'Manual',     minutesAgo: null },
 ];
 
 export default function TimeSelectScreen({ route, navigation }) {
-  const { category } = route.params;          // e.g. "Seizure"
+  const { category } = route.params;
+  const [picking, setPicking] = useState(false);
+  const [pickerValue, setPickerValue] = useState(new Date());
+
+  const goTo = (iso) => navigation.navigate(category, { time: iso, category });
 
   const onPresetPress = (preset) => {
     if (preset.minutesAgo === null) {
-      //  Manual: show the system date-time picker ---------------------------
-      navigation.navigate(category, { time: new Date().toISOString(), category });
-      //  For brevity we skip picker implementation here; plug one in later.
+      setPickerValue(new Date());
+      setPicking(true);
     } else {
-      const time = new Date(Date.now() - preset.minutesAgo * 60_000);
-      navigation.navigate(category, { time: time.toISOString(), category });
+      goTo(new Date(Date.now() - preset.minutesAgo * 60_000).toISOString());
     }
   };
 
@@ -32,15 +34,41 @@ export default function TimeSelectScreen({ route, navigation }) {
       <Text style={styles.heading}>When did it happen?</Text>
       <View style={styles.grid}>
         {PRESETS.map((p) => (
-          <TouchableOpacity
-            key={p.label}
-            style={styles.btn}
-            onPress={() => onPresetPress(p)}
-          >
+          <TouchableOpacity key={p.label} style={styles.btn} onPress={() => onPresetPress(p)}>
             <Text style={styles.btnText}>{p.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
+
+      {picking && (
+        <DateTimePicker
+          value={pickerValue}
+          mode="datetime"
+          maximumDate={new Date()}
+          onChange={(event, date) => {
+            if (Platform.OS !== 'ios') setPicking(false);
+            if (event.type === 'dismissed') { setPicking(false); return; }
+            if (date) {
+              setPickerValue(date);
+              if (Platform.OS !== 'ios') goTo(date.toISOString());
+            }
+          }}
+        />
+      )}
+
+      {picking && Platform.OS === 'ios' && (
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16 }}>
+          <TouchableOpacity style={styles.iosBtn} onPress={() => setPicking(false)}>
+            <Text style={{ color: '#4F83FF' }}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.iosBtn, { backgroundColor: '#4F83FF' }]}
+            onPress={() => { setPicking(false); goTo(pickerValue.toISOString()); }}
+          >
+            <Text style={{ color: '#fff' }}>Use this time</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -55,5 +83,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     borderRadius: 12,
   },
-  btnText:   { color: '#fff', fontSize: 16, textAlign: 'center' },
+  btnText: { color: '#fff', fontSize: 16, textAlign: 'center' },
+  iosBtn:  { padding: 12, marginHorizontal: 8, borderRadius: 8, borderWidth: 1, borderColor: '#4F83FF' },
 });

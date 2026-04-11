@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet, ScrollView, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import SafeScreen from '../components/SafeScreen';
 import { useAuth } from '../context/AuthContext';
 import { useSeizures } from '../context/SeizureContext';
@@ -51,14 +52,16 @@ export default function HomeScreen({ navigation }) {
           style={[s.action, { backgroundColor: '#EF4444' }]}
           onPress={() => navigation.navigate('Seizures', { screen: 'TimeSelect', params: { category: 'Seizure' } })}
         >
-          <Text style={s.actionText}>＋ Log a Seizure</Text>
+          <Ionicons name="add-circle-outline" size={22} color="#fff" />
+          <Text style={s.actionText}>  Log a Seizure</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[s.action, { backgroundColor: '#10B981' }]}
           onPress={() => navigation.navigate('Keto', { screen: 'KetoLog' })}
         >
-          <Text style={s.actionText}>＋ Log Keto Entry</Text>
+          <Ionicons name="add-circle-outline" size={22} color="#fff" />
+          <Text style={s.actionText}>  Log Keto Entry</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeScreen>
@@ -73,7 +76,7 @@ const Card = ({ label, value, color }) => (
 );
 
 const s = StyleSheet.create({
-  container:  { padding: 20, paddingBottom: 32 },
+  container:  { padding: 20, paddingBottom: 40 },
   hello:      { fontSize: 26, fontWeight: 'bold' },
   subtitle:   { color: '#666', marginBottom: 20 },
   row:        { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
@@ -85,6 +88,7 @@ const s = StyleSheet.create({
   cardTitle:  { color: '#888', fontSize: 12, textTransform: 'uppercase', marginBottom: 4 },
   cardBody:   { fontSize: 16, fontWeight: '600' },
   cardMeta:   { color: '#666', marginTop: 2 },
-  action:     { padding: 16, borderRadius: 12, marginTop: 12, alignItems: 'center' },
+  action:     { padding: 16, borderRadius: 12, marginTop: 12, flexDirection: 'row',
+                alignItems: 'center', justifyContent: 'center' },
   actionText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

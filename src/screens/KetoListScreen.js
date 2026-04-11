@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import SafeScreen from '../components/SafeScreen';
 import { useKeto } from '../context/KetoContext';
 import { deleteKeto } from '../services/ketoApi';
 
@@ -13,7 +15,8 @@ export default function KetoListScreen({ navigation }) {
     ]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <SafeScreen>
+      <Text style={s.title}>Keto log</Text>
       <FlatList
         data={items}
         keyExtractor={(i) => i._id}
@@ -43,19 +46,20 @@ export default function KetoListScreen({ navigation }) {
         )}
       />
       <TouchableOpacity style={s.fab} onPress={() => navigation.navigate('KetoLog')}>
-        <Text style={s.fabText}>＋</Text>
+        <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
-    </View>
+    </SafeScreen>
   );
 }
 
 const s = StyleSheet.create({
+  title:   { fontSize: 26, fontWeight: 'bold', marginHorizontal: 16, marginTop: 8, marginBottom: 4 },
   card:    { backgroundColor: '#fff', padding: 14, borderRadius: 10, marginBottom: 10, elevation: 2,
              shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 3, shadowOffset: { width: 0, height: 1 } },
   date:    { color: '#666', marginBottom: 4 },
   notes:   { marginTop: 4, color: '#444', fontStyle: 'italic' },
   empty:   { textAlign: 'center', color: '#888', marginTop: 40 },
-  fab:     { position: 'absolute', right: 20, bottom: 20, width: 56, height: 56, borderRadius: 28,
-             backgroundColor: '#10B981', alignItems: 'center', justifyContent: 'center', elevation: 4 },
-  fabText: { color: '#fff', fontSize: 28, lineHeight: 30 },
+  fab:     { position: 'absolute', right: 20, bottom: 24, width: 56, height: 56, borderRadius: 28,
+             backgroundColor: '#10B981', alignItems: 'center', justifyContent: 'center', elevation: 4,
+             shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
 });

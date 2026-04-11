@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, FlatList, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import SafeScreen from '../components/SafeScreen';
 import { useSeizures } from '../context/SeizureContext';
 import { deleteSeizure } from '../services/seizureApi';
 
@@ -18,7 +20,8 @@ export default function SeizureListScreen({ navigation }) {
     ]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <SafeScreen>
+      <Text style={styles.title}>Seizures</Text>
       <FlatList
         horizontal
         data={FILTERS}
@@ -64,13 +67,14 @@ export default function SeizureListScreen({ navigation }) {
         style={styles.fab}
         onPress={() => navigation.navigate('TimeSelect', { category: 'Seizure' })}
       >
-        <Text style={styles.fabText}>＋</Text>
+        <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
-    </View>
+    </SafeScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  title:      { fontSize: 26, fontWeight: 'bold', marginHorizontal: 16, marginTop: 8 },
   pill:       { borderWidth: 1, borderColor: '#4F83FF', padding: 6, paddingHorizontal: 12,
                 borderRadius: 16, marginRight: 6 },
   pillActive: { backgroundColor: '#4F83FF' },
@@ -79,7 +83,7 @@ const styles = StyleSheet.create({
   date:       { color: '#666', marginBottom: 4 },
   body:       { fontSize: 16, fontWeight: '600' },
   empty:      { textAlign: 'center', color: '#888', marginTop: 40 },
-  fab:        { position: 'absolute', right: 20, bottom: 20, width: 56, height: 56, borderRadius: 28,
-                backgroundColor: '#EF4444', alignItems: 'center', justifyContent: 'center', elevation: 4 },
-  fabText:    { color: '#fff', fontSize: 28, lineHeight: 30 },
+  fab:        { position: 'absolute', right: 20, bottom: 24, width: 56, height: 56, borderRadius: 28,
+                backgroundColor: '#EF4444', alignItems: 'center', justifyContent: 'center', elevation: 4,
+                shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
 });

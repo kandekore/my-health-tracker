@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet, Dimensions } from 'react-native';
 import { BarChart, LineChart } from 'react-native-chart-kit';
+import SafeScreen from '../components/SafeScreen';
 import { useSeizures } from '../context/SeizureContext';
 import { useKeto } from '../context/KetoContext';
 
@@ -15,18 +16,14 @@ const chartConfig = {
 };
 
 const startOfDay = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
-const daysAgo = (n) => startOfDay(new Date(Date.now() - n * 86400000));
+const daysAgo    = (n) => startOfDay(new Date(Date.now() - n * 86400000));
 
 export default function InsightsScreen() {
   const { items: seizures } = useSeizures();
   const { items: keto }     = useKeto();
 
-  // Seizures per day, last 7 days
   const weekly = useMemo(() => {
-    const buckets = Array.from({ length: 7 }, (_, i) => ({
-      date: daysAgo(6 - i),
-      count: 0,
-    }));
+    const buckets = Array.from({ length: 7 }, (_, i) => ({ date: daysAgo(6 - i), count: 0 }));
     seizures.forEach((s) => {
       const t = startOfDay(s.time).getTime();
       const hit = buckets.find((b) => b.date.getTime() === t);
@@ -40,19 +37,14 @@ export default function InsightsScreen() {
 
   const totalThisWeek = weekly.datasets[0].data.reduce((a, b) => a + b, 0);
 
-  // Seizure type breakdown
   const typeCounts = useMemo(() => {
     const m = {};
     seizures.forEach((s) => { m[s.type] = (m[s.type] || 0) + 1; });
     return Object.entries(m).sort((a, b) => b[1] - a[1]);
   }, [seizures]);
 
-  // Ketone trend — last 14 readings with a value, oldest→newest
   const ketoneSeries = useMemo(() => {
-    const withK = keto
-      .filter((k) => k.ketonesMmol != null)
-      .slice(0, 14)
-      .reverse();
+    const withK = keto.filter((k) => k.ketonesMmol != null).slice(0, 14).reverse();
     if (!withK.length) return null;
     return {
       labels: withK.map((k) => {
@@ -63,7 +55,6 @@ export default function InsightsScreen() {
     };
   }, [keto]);
 
-  // GKI trend
   const gkiSeries = useMemo(() => {
     const withBoth = keto
       .filter((k) => k.ketonesMmol > 0 && k.glucoseMmol > 0)
@@ -96,15 +87,13 @@ export default function InsightsScreen() {
       const idx = days.findIndex((d) => d.getTime() === startOfDay(k.time).getTime());
       if (idx >= 0) { ketoneByDay[idx].sum += k.ketonesMmol; ketoneByDay[idx].n += 1; }
     });
-    seizures.forEach((s) => {
-      const idx = days.findIndex((d) => d.getTime() === startOfDay(s.time).getTime());
+    seizures.forEach((se) => {
+      const idx = days.findIndex((d) => d.getTime() === startOfDay(se.time).getTime());
       if (idx >= 0) seizureByDay[idx] += 1;
     });
 
-    const hasAnyKeto = ketoneByDay.some((b) => b.n > 0);
-    if (!hasAnyKeto) return null;
+    if (!ketoneByDay.some((b) => b.n > 0)) return null;
 
-    // Forward-fill missing ketone days so the line stays continuous
     let last = 0;
     const ketoneVals = ketoneByDay.map((b) => {
       if (b.n === 0) return last;
@@ -112,110 +101,106 @@ export default function InsightsScreen() {
       return last;
     });
 
-    const labels = days.map((d, i) =>
-      i % 2 === 0 ? `${d.getMonth() + 1}/${d.getDate()}` : ''
-    );
+    const labels = days.map((d, i) => (i % 2 === 0 ? `${d.getMonth() + 1}/${d.getDate()}` : ''));
 
     return {
       labels,
-      ketone: { labels, datasets: [{ data: ketoneVals }] },
+      ketone:  { labels, datasets: [{ data: ketoneVals }] },
       seizure: { labels, datasets: [{ data: seizureByDay }] },
       totalSeizures: seizureByDay.reduce((a, b) => a + b, 0),
     };
   }, [keto, seizures]);
 
   return (
-    <ScrollView contentContainerStyle={s.container}>
-      <Text style={s.title}>Insights</Text>
+    <SafeScreen>
+      <ScrollView contentContainerStyle={s.container}>
+        <Text style={s.title}>Insights</Text>
 
-      <View style={s.row}>
-        <Stat label="Seizures (7d)" value={totalThisWeek} color="#EF4444" />
-        <Stat label="Avg ketones"   value={avgKetones}    color="#10B981" />
-        <Stat label="Keto entries"  value={keto.length}   color="#F59E0B" />
-      </View>
+        <View style={s.row}>
+          <Stat label="Seizures (7d)" value={totalThisWeek} color="#EF4444" />
+          <Stat label="Avg ketones"   value={avgKetones}    color="#10B981" />
+          <Stat label="Keto entries"  value={keto.length}   color="#F59E0B" />
+        </View>
 
-      <Section title="Seizures · last 7 days">
-        <BarChart
-          data={weekly}
-          width={screenW - 32}
-          height={200}
-          fromZero
-          chartConfig={{ ...chartConfig, color: (o = 1) => `rgba(239, 68, 68, ${o})` }}
-          style={s.chart}
-        />
-      </Section>
-
-      {typeCounts.length > 0 && (
-        <Section title="Seizure types">
-          {typeCounts.map(([type, n]) => (
-            <View key={type} style={s.typeRow}>
-              <Text style={s.typeLabel}>{type}</Text>
-              <Text style={s.typeCount}>{n}</Text>
-            </View>
-          ))}
-        </Section>
-      )}
-
-      {correlation && (
-        <Section title="Ketones vs seizures · last 14 days">
-          <Text style={s.caption}>Daily average ketones (mmol/L)</Text>
-          <LineChart
-            data={correlation.ketone}
-            width={screenW - 32}
-            height={180}
-            withDots
-            chartConfig={{ ...chartConfig, color: (o = 1) => `rgba(16, 185, 129, ${o})` }}
-            bezier
-            style={s.chart}
-          />
-          <Text style={s.caption}>Seizures per day (same range)</Text>
+        <Section title="Seizures · last 7 days">
           <BarChart
-            data={correlation.seizure}
+            data={weekly}
             width={screenW - 32}
-            height={160}
+            height={200}
             fromZero
-            withInnerLines={false}
-            chartConfig={{
-              ...chartConfig,
-              decimalPlaces: 0,
-              color: (o = 1) => `rgba(239, 68, 68, ${o})`,
-            }}
+            chartConfig={{ ...chartConfig, color: (o = 1) => `rgba(239, 68, 68, ${o})` }}
             style={s.chart}
           />
-          <Text style={s.caption}>
-            {correlation.totalSeizures} seizure{correlation.totalSeizures === 1 ? '' : 's'} in this window
-          </Text>
         </Section>
-      )}
 
-      {ketoneSeries ? (
-        <Section title="Ketone trend (mmol/L)">
-          <LineChart
-            data={ketoneSeries}
-            width={screenW - 32}
-            height={200}
-            chartConfig={{ ...chartConfig, color: (o = 1) => `rgba(16, 185, 129, ${o})` }}
-            bezier
-            style={s.chart}
-          />
-        </Section>
-      ) : (
-        <Empty text="Log keto entries with ketone readings to see trends." />
-      )}
+        {typeCounts.length > 0 && (
+          <Section title="Seizure types">
+            {typeCounts.map(([type, n]) => (
+              <View key={type} style={s.typeRow}>
+                <Text style={s.typeLabel}>{type}</Text>
+                <Text style={s.typeCount}>{n}</Text>
+              </View>
+            ))}
+          </Section>
+        )}
 
-      {gkiSeries && (
-        <Section title="GKI trend (lower = deeper ketosis)">
-          <LineChart
-            data={gkiSeries}
-            width={screenW - 32}
-            height={200}
-            chartConfig={chartConfig}
-            bezier
-            style={s.chart}
-          />
-        </Section>
-      )}
-    </ScrollView>
+        {correlation && (
+          <Section title="Ketones vs seizures · last 14 days">
+            <Text style={s.caption}>Daily average ketones (mmol/L)</Text>
+            <LineChart
+              data={correlation.ketone}
+              width={screenW - 32}
+              height={180}
+              withDots
+              chartConfig={{ ...chartConfig, color: (o = 1) => `rgba(16, 185, 129, ${o})` }}
+              bezier
+              style={s.chart}
+            />
+            <Text style={s.caption}>Seizures per day (same range)</Text>
+            <BarChart
+              data={correlation.seizure}
+              width={screenW - 32}
+              height={160}
+              fromZero
+              withInnerLines={false}
+              chartConfig={{ ...chartConfig, decimalPlaces: 0, color: (o = 1) => `rgba(239, 68, 68, ${o})` }}
+              style={s.chart}
+            />
+            <Text style={s.caption}>
+              {correlation.totalSeizures} seizure{correlation.totalSeizures === 1 ? '' : 's'} in this window
+            </Text>
+          </Section>
+        )}
+
+        {ketoneSeries ? (
+          <Section title="Ketone trend (mmol/L)">
+            <LineChart
+              data={ketoneSeries}
+              width={screenW - 32}
+              height={200}
+              chartConfig={{ ...chartConfig, color: (o = 1) => `rgba(16, 185, 129, ${o})` }}
+              bezier
+              style={s.chart}
+            />
+          </Section>
+        ) : (
+          <Empty text="Log keto entries with ketone readings to see trends." />
+        )}
+
+        {gkiSeries && (
+          <Section title="GKI trend (lower = deeper ketosis)">
+            <LineChart
+              data={gkiSeries}
+              width={screenW - 32}
+              height={200}
+              chartConfig={chartConfig}
+              bezier
+              style={s.chart}
+            />
+          </Section>
+        )}
+      </ScrollView>
+    </SafeScreen>
   );
 }
 

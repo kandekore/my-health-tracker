@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import SafeScreen from '../components/SafeScreen';
 
 export default function SeizureConfirm({ route, navigation }) {
   const { payload } = route.params ?? {};
   return (
+    <SafeScreen edges={['top', 'bottom']}>
     <View style={styles.container}>
       <Text style={styles.title}>Seizure Logged ✅</Text>
       {payload && (
@@ -16,9 +18,10 @@ export default function SeizureConfirm({ route, navigation }) {
         </>
       )}
       <TouchableOpacity style={styles.btn} onPress={() => navigation.popToTop()}>
-        <Text style={{ color: '#fff' }}>Back to Home</Text>
+        <Text style={{ color: '#fff' }}>Back to list</Text>
       </TouchableOpacity>
     </View>
+    </SafeScreen>
   );
 }
 

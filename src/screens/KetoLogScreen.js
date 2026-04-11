@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
+import SafeScreen from '../components/SafeScreen';
 import { createKeto } from '../services/ketoApi';
 import { useKeto } from '../context/KetoContext';
 
@@ -40,8 +42,16 @@ export default function KetoLogScreen({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={s.container}>
-      <Text style={s.heading}>Log Keto Entry</Text>
+    <SafeScreen edges={['top', 'bottom']}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <ScrollView contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
+      <View style={s.headerRow}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
+          <Ionicons name="chevron-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={s.heading}>Log keto entry</Text>
+        <View style={{ width: 32 }} />
+      </View>
 
       <Text style={s.label}>When</Text>
       <TouchableOpacity style={s.timeBtn} onPress={() => setShow(true)}>
@@ -72,9 +82,12 @@ export default function KetoLogScreen({ navigation }) {
       />
 
       <TouchableOpacity style={s.saveBtn} onPress={save}>
-        <Text style={s.saveText}>Save</Text>
+        <Ionicons name="checkmark-circle" size={22} color="#fff" />
+        <Text style={s.saveText}>  Save entry</Text>
       </TouchableOpacity>
     </ScrollView>
+    </KeyboardAvoidingView>
+    </SafeScreen>
   );
 }
 
@@ -94,11 +107,14 @@ function Row({ label, value, onChange }) {
 
 const s = StyleSheet.create({
   container: { padding: 20, paddingBottom: 60 },
-  heading:   { fontSize: 24, textAlign: 'center', marginBottom: 16, fontWeight: 'bold' },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  backBtn:   { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
+  heading:   { fontSize: 22, fontWeight: 'bold' },
   label:     { fontSize: 14, color: '#555', marginTop: 10, marginBottom: 4 },
   input:     { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10 },
   timeBtn:   { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 },
   gki:       { marginTop: 12, fontSize: 16, textAlign: 'center' },
-  saveBtn:   { backgroundColor: '#10B981', padding: 14, borderRadius: 8, alignItems: 'center', marginTop: 24 },
-  saveText:  { color: '#fff', fontSize: 16, fontWeight: '600' },
+  saveBtn:   { backgroundColor: '#10B981', padding: 16, borderRadius: 12,
+               flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 24 },
+  saveText:  { color: '#fff', fontSize: 17, fontWeight: '600' },
 });

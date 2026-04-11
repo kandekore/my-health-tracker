@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import SafeScreen from '../components/SafeScreen';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginScreen({ navigation }) {
@@ -17,6 +18,8 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
+    <SafeScreen edges={['top', 'bottom']}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <View style={s.container}>
       <Text style={s.title}>Health Obs Tracker</Text>
       <Text style={s.sub}>Sign in to continue</Text>
@@ -34,6 +37,8 @@ export default function LoginScreen({ navigation }) {
         <Text style={s.link}>No account? Create one</Text>
       </TouchableOpacity>
     </View>
+    </KeyboardAvoidingView>
+    </SafeScreen>
   );
 }
 

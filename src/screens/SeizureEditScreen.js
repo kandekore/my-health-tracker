@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, StyleSheet, Platform, KeyboardAvoidingView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
+import SafeScreen from '../components/SafeScreen';
 import { updateSeizure, deleteSeizure } from '../services/seizureApi';
 import { useSeizures } from '../context/SeizureContext';
 
@@ -49,8 +51,16 @@ export default function SeizureEditScreen({ route, navigation }) {
     ]);
 
   return (
-    <ScrollView contentContainerStyle={s.container}>
-      <Text style={s.heading}>Edit Seizure</Text>
+    <SafeScreen edges={['top', 'bottom']}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <ScrollView contentContainerStyle={s.container} keyboardShouldPersistTaps="handled">
+      <View style={s.headerRow}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
+          <Ionicons name="chevron-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={s.heading}>Edit seizure</Text>
+        <View style={{ width: 32 }} />
+      </View>
 
       <Text style={s.label}>Type</Text>
       <View style={s.grid}>
@@ -96,12 +106,16 @@ export default function SeizureEditScreen({ route, navigation }) {
         <Text style={s.deleteText}>Delete</Text>
       </TouchableOpacity>
     </ScrollView>
+    </KeyboardAvoidingView>
+    </SafeScreen>
   );
 }
 
 const s = StyleSheet.create({
   container:  { padding: 20, paddingBottom: 60 },
-  heading:    { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
+  headerRow:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  backBtn:    { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
+  heading:    { fontSize: 22, fontWeight: 'bold' },
   label:      { fontSize: 14, color: '#555', marginTop: 16, marginBottom: 6 },
   grid:       { flexDirection: 'row', flexWrap: 'wrap' },
   pill:       { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20,

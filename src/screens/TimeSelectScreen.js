@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
+import SafeScreen from '../components/SafeScreen';
 
 const PRESETS = [
   { label: 'Now',        minutesAgo: 0 },
@@ -30,7 +32,11 @@ export default function TimeSelectScreen({ route, navigation }) {
   };
 
   return (
+    <SafeScreen edges={['top', 'bottom']}>
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <Ionicons name="chevron-back" size={24} color="#333" />
+      </TouchableOpacity>
       <Text style={styles.heading}>When did it happen?</Text>
       <View style={styles.grid}>
         {PRESETS.map((p) => (
@@ -70,12 +76,14 @@ export default function TimeSelectScreen({ route, navigation }) {
         </View>
       )}
     </View>
+    </SafeScreen>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 24, justifyContent: 'center' },
-  heading:   { fontSize: 22, textAlign: 'center', marginBottom: 24 },
+  backBtn:   { position: 'absolute', top: 8, left: 8, width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  heading:   { fontSize: 22, textAlign: 'center', marginBottom: 24, fontWeight: '600' },
   grid:      { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
   btn: {
     width: '40%', margin: '5%', aspectRatio: 1,
